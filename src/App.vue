@@ -1,5 +1,5 @@
 <script setup>
-import {ref} from 'vue'
+import {ref, onMounted, watch} from 'vue'
 const todos = ref([])
 const name = ref('')
 const input_content = ref('')
@@ -26,6 +26,19 @@ const addTodo = () => {
 const removeTodo = (todo) => {
   todos.value = todos.value.filter(t => t !== todo)
 }
+
+onMounted( () => {
+  name.value = localStorage.getItem('name') || ''
+  todos.value = JSON.parse(localStorage.getItem('todos')) || []
+})
+
+watch(name, (newVal) => {
+  localStorage.setItem('name', newVal)
+})
+
+watch(todos, (newVal) => {
+  localStorage.setItem('todos', JSON.stringify(newVal))
+}, {deep: true})
 
 </script>
 
@@ -54,7 +67,7 @@ const removeTodo = (todo) => {
           </label>
 
           <label>
-            <input type="radio" name="category" value="perosnal" v-model="input_category" />
+            <input type="radio" name="category" value="personal" v-model="input_category" />
             <span class="bubble personal"></span>
             <div>Personal</div>
           </label>
@@ -69,7 +82,7 @@ const removeTodo = (todo) => {
 
     <section class="todo-list">
       <div class="list">
-        <div v-for="todo in todos" :class="`todo-item ${todo.done ? 'done' : 'not-done'}`" :key="todo">
+        <div v-for="todo in todos.slice().reverse()" :class="`todo-item ${todo.done ? 'done' : 'not-done'}`" :key="todo">
         <label>
           <input type="checkbox" v-model="todo.done" />
           <span :class="`bubble ${todo.category}`"></span>
